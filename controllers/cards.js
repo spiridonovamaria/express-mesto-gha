@@ -25,7 +25,7 @@ const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params._id)
     .then((card) => {
       if (card) {
-        res.send({ data: card });
+        res.status(200).send({ data: card });
       } else {
         res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
       }
@@ -47,9 +47,9 @@ const addLike = (req, res) => {
   )
     .then((card) => {
       if (card) {
-        res.status(200).send({ card });
+        res.status(201).send({ card });
       } else {
-        res.status(400).send({ message: 'Запрашиваемая карточка не найдена' });
+        res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
       }
     })
     .catch((error) => {
@@ -69,9 +69,9 @@ const deleteLike = (req, res) => {
   )
     .then((card) => {
       if (card) {
-        res.send({ card });
+        res.status(200).send({ card });
       } else {
-        res.status(400).send({ message: 'Запрашиваемая карточка не найдена' });
+        res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
       }
     })
     .catch((error) => {
