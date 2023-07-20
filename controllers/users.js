@@ -47,7 +47,7 @@ const updateUser = (req, res) => {
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
-        res.send({
+        res.status(200).send({
           data: user,
         });
       } else {
@@ -68,7 +68,7 @@ const editAvatarUser = (req, res) => {
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
-        res.send({
+        res.status(200).send({
           data: user,
         });
       } else {
