@@ -64,14 +64,14 @@ const addLike = (req, res) => {
 const deleteLike = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $pull: { likes: req.user._id } }, // убрать _id из массива
+    { $pull: { likes: req.user._id } },
     { new: true },
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+        res.status(404).send({ message: 'Не найдена запрашиваемая карточка' });
       } else {
-        res.status(200).send({ card });
+        res.send({ card });
       }
     })
     .catch((error) => {
