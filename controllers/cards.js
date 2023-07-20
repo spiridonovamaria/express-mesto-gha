@@ -49,7 +49,7 @@ const addLike = (req, res) => {
       if (card) {
         res.status(201).send({ card });
       } else {
-        res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+        res.status(400).send({ message: 'Запрашиваемая карточка не найдена' });
       }
     })
     .catch((error) => {
@@ -71,7 +71,7 @@ const deleteLike = (req, res) => {
       if (card) {
         res.status(200).send({ card });
       } else {
-        res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+        res.status(200).send({ message: 'Запрашиваемая карточка не найдена' });
       }
     })
     .catch((error) => {
