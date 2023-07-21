@@ -22,7 +22,12 @@ const addCard = (req, res) => {
 };
 
 const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params._id)
+  const owner = req.user._id;
+  const { cardId } = req.params;
+  Card.findByIdAndRemove({
+    owner,
+    _id: cardId,
+  })
     .then((card) => {
       if (card) {
         res.status(200).send({ data: card });
