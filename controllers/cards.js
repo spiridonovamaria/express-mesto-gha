@@ -11,7 +11,7 @@ const getInitialCards = (req, res) => {
 const addCard = (req, res) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.status(201).send({ data: card }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при добавлении карточки' });
