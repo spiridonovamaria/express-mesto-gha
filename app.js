@@ -34,10 +34,10 @@ app.post('/signup', celebrate({
     password: Joi.string().required().min(4),
   }),
 }), createUser);
-app.use(auth);
+
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
-
+app.use(auth);
 app.use('*', (req, res, next) => {
   next(new NotFound('Страница не найдена'));
 });
