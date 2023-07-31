@@ -2,8 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { Joi, celebrate, errors } = require('celebrate');
-const userRouter = require('./routes/users');
-const cardRouter = require('./routes/cards');
+const usersRouter = require('./routes/users');
+const cardsRouter = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFound = require('./errors/NotFound');
@@ -35,8 +35,8 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 app.use(auth);
-app.use(userRouter);
-app.use(cardRouter);
+app.use('/users', usersRouter);
+app.use('/cards', cardsRouter);
 
 app.use('*', (req, res, next) => {
   next(new NotFound('Страница не найдена'));
