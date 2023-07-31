@@ -28,31 +28,6 @@ const getUser = (req, res, next) => {
     });
 };
 
-/*const createUser = (req, res, next) => {
-  const {
-    name, about, avatar, email,
-  } = req.body;
-  bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
-      name, about, avatar, email, password: hash,
-    }))
-    .then((user) => {
-      res.status(201).send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email: user.email,
-      });
-    })
-    .catch((error) => {
-      if (error.name === 'ValidationError') {
-        next(new BadRequest('Переданы некорректные данные при создании аккаунта'));
-      }
-      if (error.code === 11000) {
-        next(new Conflict('Пользователь уже существует'));
-      } next(error);
-    });
-};*/
 const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
