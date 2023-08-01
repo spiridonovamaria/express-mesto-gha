@@ -73,11 +73,10 @@ const editAvatarUser = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
-      if (user) {
-        res.status(200).send(user);
-      } else {
-        next(new NotFound('Пользователь не найден'));
+      if (!user) {
+        throw new NotFound('Пользователь не найден');
       }
+      return res.status(200).send(user);
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
