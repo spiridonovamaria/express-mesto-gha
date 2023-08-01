@@ -19,7 +19,6 @@ const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
 const NotFound = require('./errors/NotFound');
-const CentralErrorHandling = require('./middlewares/CentralErrorHandling');
 
 app.use(bodyParser.json());
 app.post('/signin', celebrate({
@@ -47,7 +46,6 @@ app.use('*', (req, res, next) => {
   next(new NotFound('Страница не найдена'));
 });
 app.use(errors());
-app.use(CentralErrorHandling);
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
