@@ -108,23 +108,19 @@ const login = (req, res, next) => {
 };
 
 const getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
-    .then((user) => {
-      if (user) {
-        res.send({
-          data: user,
-        });
-      } else {
-        next(new NotFound('Пользователь не найден'));
-      }
-    })
+  const { _id } = req.user;
+
+  User.findById(_id)
+    .orFail(() => next(new NotFound('Пользователь c указанным id не найден')))
+    .then((user) => res.send(user))
     .catch((error) => {
       if (error.name === 'CastError') {
-        return next(new BadRequest('Переданы некорректные данные пользователя'));
-      } return next(error);
+        next(new BadRequest('Передача некорректного id'));
+      } else {
+        next(error);
+      }
     });
 };
-
 module.exports = {
   getUsers,
   getUser,
