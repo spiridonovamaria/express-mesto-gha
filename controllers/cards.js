@@ -67,7 +67,7 @@ const deleteLike = (req, res, next) => {
     .then((card) => {
       if (!card) {
         return next(new NotFound('Не найдена запрашиваемая карточка'));
-      } return res.send({ card });
+      } return res.status(200).send({ card });
     })
     .catch((error) => {
       if (error.name === 'CastError') {
