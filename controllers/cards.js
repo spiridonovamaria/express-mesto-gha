@@ -46,9 +46,10 @@ const addLike = (req, res, next) => {
     { new: true },
   )
     .then((card) => {
-      if (!card) {
-        return next(new NotFound('Запрашиваемая карточка не найдена'));
-      } return res.status(200).send({ card });
+      if (card) {
+        return res.status(200).send({ card });
+      }
+      return next(new NotFound('Запрашиваемая карточка не найдена'));
     })
     .catch((error) => {
       if (error.name === 'CastError') {
