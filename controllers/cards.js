@@ -27,11 +27,11 @@ const deleteCard = (req, res, next) => {
       if (!card) {
         throw new NotFound('Запрашиваемая карточка не найдена');
       }
-      if (card.owner.toString() !== req.user._id) {
+      if (card.owner.toString() === req.user._id) {
+        Card.deleteOne(card).then(() => res.status(200).send({ message: 'Карточка удалена' }));
+      } else {
         throw new Forbidden('Удаление запрещено');
       }
-      return Card.deleteOne(card)
-        .then(() => res.status(200).send({ message: 'Карточка удалена' }));
     })
     .catch((error) => {
       if (error.name === 'CastError') {
