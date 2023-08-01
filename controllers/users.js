@@ -4,7 +4,6 @@ const User = require('../models/user');
 const BadRequest = require('../errors/BadRequest');
 const Conflict = require('../errors/Conflict');
 const NotFound = require('../errors/NotFound');
-const Unauthorized = require('../errors/autherror');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -31,31 +30,29 @@ const getUser = (req, res, next) => {
 
 const createUser = (req, res, next) => {
   const {
-    name, about, avatar, email, password,
+    name, about, avatar, email,
   } = req.body;
-
-  bcrypt
-    .hash(password, 10)
+  bcrypt.hash(req.body.password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.status(201).send({
-      name: user.name,
-      about: user.about,
-      avatar: user.avatar,
-      email: user.email,
-    }))
+    .then((user) => {
+      res.status(201).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
+    })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        next(new BadRequest('Переданы некорректные данные'));
-      } else if (error.name === 'MongoError' || error.code === 11000) {
-        next(new Conflict('Пользователь с таким email уже зарегистрирован'));
-      } else {
-        next(error);
+        next(new BadRequest('Переданы некорректные данные при создании аккаунта'));
       }
+      if (error.code === 11000) {
+        next(new Conflict('Пользователь уже существует'));
+      } next(error);
     });
 };
-
 const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
@@ -97,42 +94,33 @@ const editAvatarUser = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  User.findOne({ email })
-    .select('+password')
+  return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        throw new Unauthorized('Неправильные почта или пароль');
-      }
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
 
-      return bcrypt.compare(password, user.password).then((matched) => {
-        if (!matched) {
-          throw new Unauthorized('Неправильные почта или пароль');
-        }
-
-        const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
-          expiresIn: '7d',
-        });
-
-        return res.send({ token });
-      });
+      // вернём токен
+      return res.status(200).send({ token });
     })
     .catch(next);
 };
-
 const getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
-
   User.findById(_id)
-    .orFail(() => next(new NotFound('Пользователь c указанным id не найден')))
-    .then((user) => res.send(user))
+    .then((user) => {
+      if (user) {
+        res.status(200).send(user);
+      } else {
+        next(new NotFound('Пользователь c указанным id не найден'));
+      }
+    })
     .catch((error) => {
       if (error.name === 'CastError') {
-        next(new BadRequest('Передача некорректного id'));
-      } else {
-        next(error);
+        return next(new BadRequest('Передача некорректного id'));
       }
+      return next(error);
     });
 };
+
 module.exports = {
   getUsers,
   getUser,

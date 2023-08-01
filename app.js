@@ -2,6 +2,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { Joi, celebrate, errors } = require('celebrate');
+const auth = require('./middlewares/auth');
+const usersRouter = require('./routes/users');
+const cardsRouter = require('./routes/cards');
+const { createUser, login } = require('./controllers/users');
+const NotFound = require('./errors/NotFound');
 
 const { PORT = 3000 } = process.env;
 const urlPattern = /^(https?:\/\/)?([а-я0-9_-]{1,32}|[a-z0-9_-]{1,32})\.([а-я0-9_-]{1,8}|[a-z0-9_-]\S{1,8})$/i;
@@ -13,12 +18,6 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useFindAndModify: false,
 });
 const app = express();
-
-const auth = require('./middlewares/auth');
-const usersRouter = require('./routes/users');
-const cardsRouter = require('./routes/cards');
-const { createUser, login } = require('./controllers/users');
-const NotFound = require('./errors/NotFound');
 
 app.use(bodyParser.json());
 app.post('/signin', celebrate({
@@ -39,8 +38,8 @@ app.post('/signup', celebrate({
 
 app.use(auth);
 
-app.use('/users', usersRouter);
-app.use('/cards', cardsRouter);
+app.use(usersRouter);
+app.use(cardsRouter);
 
 app.use('*', (req, res, next) => {
   next(new NotFound('Страница не найдена'));
