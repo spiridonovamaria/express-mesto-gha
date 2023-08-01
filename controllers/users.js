@@ -14,7 +14,7 @@ const getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (user) {
-        res.status(200).send({ data: user });
+        res.status(200).send(user);
       } else {
         next(new NotFound('Пользователь не найден'));
       }
@@ -36,11 +36,11 @@ const createUser = (req, res, next) => {
     }))
     .then((user) => {
       res.status(201).send({
+        _id: user._id,
         name: user.name,
         about: user.about,
         avatar: user.avatar,
         email: user.email,
-        _id: user._id,
       });
     })
     .catch((error) => {
@@ -57,7 +57,7 @@ const updateUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
-        res.status(200).send({ data: user });
+        res.status(200).send(user);
       } else {
         next(new NotFound('Пользователь не найден'));
       }
@@ -74,7 +74,7 @@ const editAvatarUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (user) {
-        res.status(200).send({ data: user });
+        res.status(200).send(user);
       } else {
         next(new NotFound('Пользователь не найден'));
       }

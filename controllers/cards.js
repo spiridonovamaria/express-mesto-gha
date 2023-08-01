@@ -5,14 +5,14 @@ const Forbidden = require('../errors/Forbidden');
 
 const getInitialCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.send({ data: cards }))
+    .then((cards) => res.send(cards))
     .catch(next);
 };
 
 const addCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.status(201).send({ data: card }))
+    .then((card) => res.status(201).send(card))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         return next(new BadRequest('Переданы некорректные данные при добавлении карточки'));
@@ -21,7 +21,8 @@ const addCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  const { cardId } = req.params;
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
         throw new NotFound('Запрашиваемая карточка не найдена');
@@ -29,7 +30,7 @@ const deleteCard = (req, res, next) => {
       if (card.owner.toString() !== req.user._id) {
         throw new Forbidden('Удаление запрещено');
       }
-      return Card.findByIdAndRemove(req.params.cardId)
+      return Card.deleteOne(card)
         .then(() => res.status(200).send({ message: 'Карточка удалена' }));
     })
     .catch((error) => {
@@ -47,9 +48,9 @@ const addLike = (req, res, next) => {
   )
     .then((card) => {
       if (card) {
-        return res.status(200).send({ card });
+        return res.status(200).send(card);
       }
-      return next(new NotFound('Запрашиваемая карточка не найдена'));
+      throw new NotFound('Запрашиваемая карточка не найдена');
     })
     .catch((error) => {
       if (error.name === 'CastError') {
@@ -66,8 +67,8 @@ const deleteLike = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        return next(new NotFound('Не найдена запрашиваемая карточка'));
-      } return res.status(200).send({ card });
+        throw new NotFound('Не найдена запрашиваемая карточка');
+      } return res.status(200).send(card);
     })
     .catch((error) => {
       if (error.name === 'CastError') {
