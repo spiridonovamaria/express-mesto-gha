@@ -4,6 +4,7 @@ const User = require('../models/user');
 const BadRequest = require('../errors/BadRequest');
 const Conflict = require('../errors/Conflict');
 const NotFound = require('../errors/NotFound');
+const Unauthorized = require('../errors/autherror');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -32,30 +33,29 @@ const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+
   bcrypt
     .hash(password, 10)
-    .then((hash) => User
-      .create({
-        name, about, avatar, email, password: hash,
-      }))
-    .then((user) => {
-      res.status(201).send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email: user.email,
-      });
-    })
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
+    .then((user) => res.status(201).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         next(new BadRequest('Переданы некорректные данные'));
-      } else if (error.code === 11000) {
-        next(new Conflict('Пользователь уже существует'));
+      } else if (error.name === 'MongoError' || error.code === 11000) {
+        next(new Conflict('Пользователь с таким email уже зарегистрирован'));
       } else {
         next(error);
       }
     });
 };
+
 const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
@@ -97,12 +97,24 @@ const editAvatarUser = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  return User.findUserByCredentials(email, password)
+  User.findOne({ email })
+    .select('+password')
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+      if (!user) {
+        throw new Unauthorized('Неправильные почта или пароль');
+      }
 
-      // вернём токен
-      return res.status(200).send({ token });
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          throw new Unauthorized('Неправильные почта или пароль');
+        }
+
+        const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
+          expiresIn: '7d',
+        });
+
+        return res.send({ token });
+      });
     })
     .catch(next);
 };
