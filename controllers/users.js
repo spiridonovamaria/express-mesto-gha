@@ -7,7 +7,7 @@ const NotFound = require('../errors/NotFound');
 
 const getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => res.send(users))
     .catch(next);
 };
 const getUser = (req, res, next) => {
@@ -56,7 +56,6 @@ const createUser = (req, res, next) => {
       }
     });
 };
-
 const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
