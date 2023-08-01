@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const Unauthorized = require('../errors/unauthorized');
+const Unauthorized = require('../errors/autherror');
 
 const JWT_SECRET = 'super-strong-secret';
 
