@@ -46,10 +46,11 @@ const createUser = (req, res, next) => {
     .catch((error) => {
       if (error.name === 'ValidationError') {
         next(new BadRequest('Переданы некорректные данные при создании аккаунта'));
-      }
-      if (error.code === 11000) {
+      } else if (error.code === 11000) {
         next(new Conflict('Пользователь уже существует'));
-      } next(error);
+      } else {
+        next(error);
+      }
     });
 };
 const updateUser = (req, res, next) => {
@@ -107,12 +108,7 @@ const getCurrentUser = (req, res, next) => {
         next(new NotFound('Пользователь c указанным id не найден'));
       }
     })
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        return next(new BadRequest('Передача некорректного id'));
-      }
-      return next(error);
-    });
+    .catch(next);
 };
 
 module.exports = {

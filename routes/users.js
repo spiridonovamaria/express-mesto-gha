@@ -13,7 +13,7 @@ const urlPattern = /^(https?:\/\/)?([а-я0-9_-]{1,32}|[a-z0-9_-]{1,32})\.([а-�
 router.get('/users', getUsers);
 router.get('/users/:userId', celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().hex().length(24),
+    _id: Joi.string().hex().length(24).required(),
   }),
 }), getUser);
 router.patch('/users/me', celebrate({
