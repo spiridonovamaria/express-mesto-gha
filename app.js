@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -8,6 +10,7 @@ const cardsRouter = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
 const NotFound = require('./errors/NotFound');
 const CentralErrorHandling = require('./middlewares/CentralErrorHandling');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 const urlPattern = /^(https?:\/\/)?([а-я0-9_-]{1,32}|[a-z0-9_-]{1,32})\.([а-я0-9_-]{1,8}|[a-z0-9_-]\S{1,8})$/i;
@@ -19,6 +22,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useFindAndModify: false,
 });
 const app = express();
+app.use(requestLogger);
 
 app.use(bodyParser.json());
 app.post('/signin', celebrate({
@@ -42,9 +46,11 @@ app.use(auth);
 app.use(usersRouter);
 app.use(cardsRouter);
 
+app.use(errorLogger);
 app.use('*', (req, res, next) => {
   next(new NotFound('Страница не найдена'));
 });
+
 app.use(errors());
 app.use(CentralErrorHandling);
 app.listen(PORT, () => {
